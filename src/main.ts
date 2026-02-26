@@ -1,10 +1,24 @@
-import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+
+// Global Validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,        
+      forbidNonWhitelisted: true,
+      transform: true,        
+    }),
+  );
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Student Welfare Platform API')
@@ -16,6 +30,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = configService.get('PORT') || 3000; 
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}/api/docs`);
+
+
 }
 bootstrap();
