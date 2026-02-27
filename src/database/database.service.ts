@@ -15,6 +15,9 @@ export class DatabaseService
     await this.$disconnect();
   }
 
+
+  
+
   async testDb() {
     return await this.$queryRaw`SELECT 1`;
   }
