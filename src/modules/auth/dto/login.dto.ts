@@ -9,6 +9,6 @@ export class LoginDto {
 
   @IsNotEmpty({ message: 'Password is required' })
   @MaxLength(50, { message: 'Password is too long' })
-  @ApiProperty({ example: 'Password123!' })
+  @ApiProperty({ example: 'P@ssw0rd' })
   password: string;
 }

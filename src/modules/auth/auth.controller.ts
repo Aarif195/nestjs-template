@@ -68,7 +68,7 @@ export class AuthController {
         return this.authService.login(loginDto);
     }
 
-    // TEST ROUTE: To prove the Guards work
+    // Guards work
     @Get('profile')
     @ApiBearerAuth()
     @UseGuards(AuthGuard, RolesGuard)
