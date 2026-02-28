@@ -1,5 +1,6 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches, MinLength, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from './google-login.dto';
 
 export class RegisterDto {
   @IsNotEmpty({ message: 'First name is required' })
@@ -17,7 +18,8 @@ export class RegisterDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/, {
     message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character',
   })
-      @ApiProperty({ example: 'P@ssw0rd' })
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @ApiProperty({ example: 'P@ssw0rd' })
   password: string;
 
   @IsNotEmpty({ message: 'Phone is required' })
@@ -29,7 +31,8 @@ export class RegisterDto {
   @IsString()
   address?: string;
 
-  @ApiProperty({ example: 'student', enum: ['student', 'owner', 'superadmin'] })
+  @ApiProperty({ example: 'student', enum: ['student', 'owner'] })
   @IsOptional()
-  role?: 'student' | 'owner' | 'superadmin';
+  @IsEnum(UserRole)
+  role?: UserRole = UserRole.STUDENT;
 }
