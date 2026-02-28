@@ -1,11 +1,16 @@
 import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
+
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
+
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+
 import { AuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
+
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -40,6 +45,7 @@ export class AuthController {
         return this.authService.register(registerDto);
     }
 
+    // login
     @Post('login')
     @ApiOperation({ summary: 'User login' })
     @ApiBody({ type: LoginDto })
@@ -66,6 +72,42 @@ export class AuthController {
     })
     login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
+    }
+
+    // google
+    @Post('google')
+    @ApiOperation({ summary: 'Google OAuth login/register' })
+    @ApiBody({ type: GoogleLoginDto })
+    @ApiResponse({
+        status: 201,
+        description: 'Google login successful',
+        schema: {
+            example: {
+                user: {
+                    id: 1,
+                    email: 'user@gmail.com',
+                    role: 'student',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    image: 'https://lh3.googleusercontent.com/...'
+                },
+                token: 'jwt_token_here'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Google authentication failed',
+        schema: {
+            example: {
+                success: false,
+                message: 'Google authentication failed',
+                statusCode: 401
+            }
+        }
+    })
+    googleLogin(@Body() googleLoginDto: GoogleLoginDto) {
+        return this.authService.googleLogin(googleLoginDto);
     }
 
     // Guards work

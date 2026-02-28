@@ -49,7 +49,6 @@ export class MailService {
             });
 
             const data = await response.json();
-            console.log('Brevo Response Data:', data);
             if (!response.ok) {
                 throw new Error(data.message || response.statusText);
             }
