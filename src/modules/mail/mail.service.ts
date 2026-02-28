@@ -13,7 +13,25 @@ export class MailService {
         this.senderName = this.config.get<string>('MAIL_SENDER_NAME')!;
     }
 
-    async sendMail(to: string, subject: string, html: string, customSenderName?: string) {
+    async sendMail(to: string, subject: string, html: string) {
+        const finalHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+      <div style="background-color: #4f46e5; color: white; padding: 20px; text-align: center;">
+        <h1 style="margin: 0; font-size: 24px;">${subject}</h1>
+      </div>
+      <div style="padding: 30px; text-align: center; color: #333;">
+        ${html}
+      </div>
+      <div style="background-color: #f9fafb; padding: 15px; text-align: center; font-size: 12px; color: #999;">
+        &copy; ${new Date().getFullYear()} ${this.senderName}. All rights reserved.
+      </div>
+    </div>
+  `;
+
+        if (!this.brevoApiKey || !this.senderEmail || !this.senderName) {
+            throw new InternalServerErrorException('Email configuration is missing');
+        }
+
         try {
             const response = await fetch("https://api.brevo.com/v3/smtp/email", {
                 method: "POST",
@@ -23,18 +41,15 @@ export class MailService {
                     "api-key": this.brevoApiKey
                 },
                 body: JSON.stringify({
-                    sender: {
-                        name: customSenderName || this.senderName,
-                        email: this.senderEmail
-                    },
+                    sender: { name: this.senderName, email: this.senderEmail },
                     to: [{ email: to }],
                     subject: subject,
-                    htmlContent: html
+                    htmlContent: finalHtml
                 })
             });
 
             const data = await response.json();
-
+            console.log('Brevo Response Data:', data);
             if (!response.ok) {
                 throw new Error(data.message || response.statusText);
             }
